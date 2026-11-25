@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MovementTest {
     private final Cell start = new Cell(1, 1);
-    private final Tank tank = new Tank(start);
+    private final Tank tank = new Tank(start, 0.4f);
     private final PlayingField field = new PlayingField(new Tree(new Cell(1, 2)), tank);
 
     @Test void directionDefinesOffsetAndRotation() {
