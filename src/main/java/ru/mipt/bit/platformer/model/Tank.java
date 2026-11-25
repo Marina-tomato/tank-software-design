@@ -1,7 +1,8 @@
 package ru.mipt.bit.platformer.model;
 
 public final class Tank implements Entity {
-    private int health = 100;
+    private final int maxHealth;
+    private int health;
     private Cell cell;
     private Cell destination;
     private Direction direction = Direction.RIGHT;
@@ -10,6 +11,13 @@ public final class Tank implements Entity {
     private final float stepSeconds;
 
     public Tank(Cell cell, float stepSeconds) {
+        this(cell, stepSeconds, 100);
+    }
+
+    public Tank(Cell cell, float stepSeconds, int maxHealth) {
+        if (maxHealth <= 0) throw new IllegalArgumentException("Initial health must be positive");
+        this.maxHealth = maxHealth;
+        this.health = maxHealth;
         if (!Float.isFinite(stepSeconds) || stepSeconds <= 0f) {
             throw new IllegalArgumentException("Invalid step duration");
         }
@@ -43,6 +51,7 @@ public final class Tank implements Entity {
 
     void takeDamage(int damage) { health = Math.max(0, health - damage); }
     public boolean isAlive() { return health > 0; }
+    public double healthFraction() { return (double) health / maxHealth; }
     public int health() { return health; }
 
     public Cell cell() { return cell; }

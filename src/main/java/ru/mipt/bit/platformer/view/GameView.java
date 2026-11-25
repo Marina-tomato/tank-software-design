@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.graphics.Pixmap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import ru.mipt.bit.platformer.model.*;
 import ru.mipt.bit.platformer.util.TileMovement;
 
@@ -24,6 +25,7 @@ import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 public final class GameView implements Disposable, FieldListener {
     private final Map<Entity, Runnable> sprites = new LinkedHashMap<>();
     private final Tank player;
+    private final BooleanSupplier healthBars;
     private final Texture pixel;
     private final SpriteBatch batch = new SpriteBatch();
     private final TiledMap map = new TmxMapLoader().load("level.tmx");
@@ -37,7 +39,8 @@ public final class GameView implements Disposable, FieldListener {
     private final Rectangle tankBounds = createBoundingRectangle(tankImage);
     private final Rectangle treeBounds = createBoundingRectangle(treeImage);
 
-    public GameView(int width, int height, Tank player) {
+    public GameView(int width, int height, Tank player, BooleanSupplier healthBars) {
+        this.healthBars = healthBars;
         this.player = player;
         Pixmap image = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         image.setColor(1, 1, 1, 1);
@@ -76,7 +79,8 @@ public final class GameView implements Disposable, FieldListener {
                 drawTextureRegionUnscaled(batch, treeImage, treeBounds, 0);
             });
         } else if (entity instanceof Tank tank) {
-            sprites.put(tank, () -> drawTank(tank));
+            sprites.put(tank, new HealthBarDecorator(() -> drawTank(tank), healthBars,
+                    tank::healthFraction, this::drawHealthBar));
         } else if (entity instanceof Bullet bullet) {
             sprites.put(bullet, () -> {
                 float x = (bullet.cell().x() + 0.5f) * ground.getTileWidth();
@@ -92,6 +96,17 @@ public final class GameView implements Disposable, FieldListener {
         if (tank != player) batch.setColor(1f, 0.45f, 0.4f, 1f);
         motion.moveRectangleBetweenTileCenters(tankBounds, grid(tank.cell()), grid(tank.destination()), tank.progress());
         drawTextureRegionUnscaled(batch, tankImage, tankBounds, tank.direction().rotation());
+        batch.setColor(1, 1, 1, 1);
+    }
+
+    private void drawHealthBar(double fraction) {
+        float width = ground.getTileWidth() * 0.68f;
+        float x = tankBounds.x + (tankBounds.width - width) / 2f;
+        float y = tankBounds.y + tankBounds.height * 0.84f;
+        batch.setColor(0.15f, 0.1f, 0.1f, 1f);
+        batch.draw(pixel, x, y, width, 8);
+        batch.setColor(0.25f, 0.9f, 0.3f, 1f);
+        batch.draw(pixel, x + 1, y + 1, (width - 2) * (float) fraction, 6);
         batch.setColor(1, 1, 1, 1);
     }
 
