@@ -1,3 +1,3 @@
 package ru.mipt.bit.platformer.model;
 
-public record Tree(Cell cell) {}
+public record Tree(Cell cell) implements Entity {}

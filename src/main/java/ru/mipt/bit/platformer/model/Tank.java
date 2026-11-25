@@ -1,6 +1,7 @@
 package ru.mipt.bit.platformer.model;
 
-public final class Tank {
+public final class Tank implements Entity {
+    private int health = 100;
     private Cell cell;
     private Cell destination;
     private Direction direction = Direction.RIGHT;
@@ -18,7 +19,7 @@ public final class Tank {
     }
 
     public void move(Direction requested, Passability field) {
-        if (isMoving()) return;
+        if (!isAlive() || isMoving()) return;
         direction = requested;
         Cell next = direction.next(cell);
         if (field.isFree(next)) {
@@ -34,6 +35,15 @@ public final class Tank {
         progress = Math.min(1f, progress + seconds / stepSeconds);
         if (!isMoving()) cell = destination;
     }
+
+    public void shoot(PlayingField field, int damage) {
+        if (damage <= 0) throw new IllegalArgumentException("Damage must be positive");
+        if (isAlive()) field.spawn(new Bullet(direction.next(cell), direction, damage, this));
+    }
+
+    void takeDamage(int damage) { health = Math.max(0, health - damage); }
+    public boolean isAlive() { return health > 0; }
+    public int health() { return health; }
 
     public Cell cell() { return cell; }
     public Cell destination() { return destination; }

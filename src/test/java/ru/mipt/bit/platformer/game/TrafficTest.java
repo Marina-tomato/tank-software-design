@@ -35,7 +35,8 @@ class TrafficTest {
     }
 
     @Test void randomDriverQueuesAnActionAndWaitsBetweenDecisions() {
-        var driver = new RandomDriver(player, field, new Random(3));
+        var driver = new RandomDriver(player, field, new Random(2),
+                new ru.mipt.bit.platformer.ai.AdvisorAdapter(new ru.mipt.bit.platformer.ai.AimAdvisor()), 25);
         var queue = new ArrayList<GameCommand>();
         driver.collect(0, queue);
         driver.collect(0.1f, queue);
