@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MovementTest {
     private final Cell start = new Cell(1, 1);
     private final Tank tank = new Tank(start, 0.4f);
-    private final PlayingField field = new PlayingField(new Tree(new Cell(1, 2)), tank);
+    private final PlayingField field = new PlayingField(4, 4, java.util.List.of(new Tree(new Cell(1, 2))), tank);
 
     @Test void directionDefinesOffsetAndRotation() {
         Cell[] cells = {new Cell(1, 2), new Cell(0, 1), new Cell(1, 0), new Cell(2, 1)};
@@ -19,7 +19,7 @@ class MovementTest {
 
     @Test void treeBlocksTravelButAllowsTurning() {
         assertSame(tank, field.player());
-        assertFalse(field.isFree(field.tree().cell()));
+        assertFalse(field.isFree(field.trees().get(0).cell()));
         tank.move(Direction.UP, field);
         assertEquals(Direction.UP, tank.direction());
         assertFalse(tank.isMoving());

@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameLoopTest {
     @Test void inputMovesTheModelBeforeItIsDrawn() {
         Tank player = new Tank(new Cell(0, 0), 1f);
-        var field = new PlayingField(new Tree(new Cell(2, 0)), player);
+        var field = new PlayingField(4, 4, List.of(new Tree(new Cell(2, 0))), player);
         var positions = new ArrayList<Cell>();
         var loop = new GameLoop(field, () -> player.move(Direction.UP, field),
                 frame -> positions.add(frame.player().cell()));
