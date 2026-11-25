@@ -41,7 +41,8 @@ public final class GameDesktopLauncher extends ApplicationAdapter {
         keyboard.bind(LEFT, A, new Move(field.player(), Direction.LEFT, field));
         keyboard.bind(DOWN, S, new Move(field.player(), Direction.DOWN, field));
         keyboard.bind(RIGHT, D, new Move(field.player(), Direction.RIGHT, field));
-        view = new GameView(layout.width(), layout.height(), field.player());
+        var healthBars = new ToggleHealthBars();
+        view = new GameView(layout.width(), layout.height(), field.player(), healthBars::visible);
         field.subscribe(view);
         Random random = new Random();
         EnemySpawner.populate(field, random, 4, 0.4f);
@@ -50,6 +51,7 @@ public final class GameDesktopLauncher extends ApplicationAdapter {
         Fire fire = new Fire(field.player(), field, 25);
         controllers.add((seconds, commands) -> {
             if (Gdx.input.isKeyJustPressed(SPACE)) commands.add(fire);
+            if (Gdx.input.isKeyJustPressed(L)) commands.add(healthBars);
         });
         var advisor = new AdvisorAdapter(new AimAdvisor());
         for (Tank tank : field.tanks()) {
