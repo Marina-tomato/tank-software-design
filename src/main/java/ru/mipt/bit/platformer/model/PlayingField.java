@@ -1,6 +1,6 @@
 package ru.mipt.bit.platformer.model;
 
-public final class PlayingField {
+public final class PlayingField implements Passability {
     private final Tree tree;
     private final Tank player;
 

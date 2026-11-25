@@ -6,12 +6,18 @@ public final class Tank {
     private Direction direction = Direction.RIGHT;
     private float progress = 1f;
 
-    public Tank(Cell cell) {
+    private final float stepSeconds;
+
+    public Tank(Cell cell, float stepSeconds) {
+        if (!Float.isFinite(stepSeconds) || stepSeconds <= 0f) {
+            throw new IllegalArgumentException("Invalid step duration");
+        }
+        this.stepSeconds = stepSeconds;
         this.cell = cell;
         this.destination = cell;
     }
 
-    public void move(Direction requested, PlayingField field) {
+    public void move(Direction requested, Passability field) {
         if (isMoving()) return;
         direction = requested;
         Cell next = direction.next(cell);
@@ -25,7 +31,7 @@ public final class Tank {
         if (!Float.isFinite(seconds) || seconds < 0f) {
             throw new IllegalArgumentException("Invalid frame duration");
         }
-        progress = Math.min(1f, progress + seconds / 0.4f);
+        progress = Math.min(1f, progress + seconds / stepSeconds);
         if (!isMoving()) cell = destination;
     }
 
