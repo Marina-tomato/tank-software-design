@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import ru.mipt.bit.platformer.game.*;
+import ru.mipt.bit.platformer.ai.*;
 import java.util.ArrayList;
 import ru.mipt.bit.platformer.input.KeyboardControls;
 import ru.mipt.bit.platformer.model.*;
@@ -40,13 +41,19 @@ public final class GameDesktopLauncher extends ApplicationAdapter {
         keyboard.bind(LEFT, A, new Move(field.player(), Direction.LEFT, field));
         keyboard.bind(DOWN, S, new Move(field.player(), Direction.DOWN, field));
         keyboard.bind(RIGHT, D, new Move(field.player(), Direction.RIGHT, field));
-        view = new GameView(layout.width(), layout.height());
+        view = new GameView(layout.width(), layout.height(), field.player());
+        field.subscribe(view);
         Random random = new Random();
         EnemySpawner.populate(field, random, 4, 0.4f);
         var controllers = new ArrayList<Controller>();
         controllers.add((seconds, commands) -> keyboard.poll(Gdx.input::isKeyPressed, commands));
+        Fire fire = new Fire(field.player(), field, 25);
+        controllers.add((seconds, commands) -> {
+            if (Gdx.input.isKeyJustPressed(SPACE)) commands.add(fire);
+        });
+        var advisor = new AdvisorAdapter(new AimAdvisor());
         for (Tank tank : field.tanks()) {
-            if (tank != field.player()) controllers.add(new RandomDriver(tank, field, random));
+            if (tank != field.player()) controllers.add(new RandomDriver(tank, field, random, advisor, 25));
         }
         game = new GameLoop(field, controllers, view::draw);
     }
