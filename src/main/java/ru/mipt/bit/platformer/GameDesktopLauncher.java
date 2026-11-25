@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Interpolation;
 import ru.mipt.bit.platformer.model.Direction;
 import ru.mipt.bit.platformer.model.Tank;
 import ru.mipt.bit.platformer.model.Tree;
+import ru.mipt.bit.platformer.model.PlayingField;
 import ru.mipt.bit.platformer.util.TileMovement;
 
 import static com.badlogic.gdx.Input.Keys.*;
@@ -32,10 +33,32 @@ public class GameDesktopLauncher implements ApplicationListener {
 
     private Tank player;
     private Tree tree;
+    private PlayingField field;
 
     // Текстуры
     private Texture blueTankTexture;
     private Texture greenTreeTexture;
+
+    private enum MoveKey {
+        NORTH(UP, W, Direction.UP),
+        WEST(LEFT, A, Direction.LEFT),
+        SOUTH(DOWN, S, Direction.DOWN),
+        EAST(RIGHT, D, Direction.RIGHT);
+
+        private final int arrow;
+        private final int letter;
+        private final Direction direction;
+
+        MoveKey(int arrow, int letter, Direction direction) {
+            this.arrow = arrow;
+            this.letter = letter;
+            this.direction = direction;
+        }
+
+        boolean isPressed() {
+            return Gdx.input.isKeyPressed(arrow) || Gdx.input.isKeyPressed(letter);
+        }
+    }
 
     @Override
     public void create() {
@@ -52,6 +75,7 @@ public class GameDesktopLauncher implements ApplicationListener {
         // Создание объектов
         player = new Tank(new TextureRegion(blueTankTexture), new GridPoint2(1, 1));
         tree = new Tree(new TextureRegion(greenTreeTexture), new GridPoint2(1, 3), groundLayer);
+        field = new PlayingField(tree);
     }
 
     @Override
@@ -62,14 +86,10 @@ public class GameDesktopLauncher implements ApplicationListener {
         float deltaTime = Gdx.graphics.getDeltaTime();
 
         // Обработка ввода
-        if (Gdx.input.isKeyPressed(UP) || Gdx.input.isKeyPressed(W)) {
-            player.move(Direction.UP, tileMovement);
-        } else if (Gdx.input.isKeyPressed(DOWN) || Gdx.input.isKeyPressed(S)) {
-            player.move(Direction.DOWN, tileMovement);
-        } else if (Gdx.input.isKeyPressed(LEFT) || Gdx.input.isKeyPressed(A)) {
-            player.move(Direction.LEFT, tileMovement);
-        } else if (Gdx.input.isKeyPressed(RIGHT) || Gdx.input.isKeyPressed(D)) {
-            player.move(Direction.RIGHT, tileMovement);
+        for (MoveKey binding : MoveKey.values()) {
+            if (binding.isPressed()) {
+                player.move(binding.direction, field);
+            }
         }
 
         // Обновление состояния

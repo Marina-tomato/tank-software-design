@@ -36,13 +36,15 @@ public class Tank extends GameObject {
         }
     }
 
-    public void move(Direction direction, TileMovement tileMovement) {
+    public void move(Direction direction, PlayingField field) {
         if (isMoving()) return;
 
         GridPoint2 nextCoords = direction.apply(coordinates);
-        destinationCoordinates.set(nextCoords);
-        movementProgress = 0f;
         rotation = direction.getRotation();
+        if (field.isFree(nextCoords)) {
+            destinationCoordinates.set(nextCoords);
+            movementProgress = 0f;
+        }
     }
 
     public void render(Batch batch, TileMovement tileMovement) {
