@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Random;
 import ru.mipt.bit.platformer.model.Cell;
 
+/** LevelSource adapter for procedurally generated maps. */
 public final class RandomLevel implements LevelSource {
     private final int width;
     private final int height;

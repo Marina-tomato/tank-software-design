@@ -2,7 +2,7 @@ package ru.mipt.bit.platformer.model;
 
 import java.util.*;
 
-public final class PlayingField implements Passability {
+public final class PlayingField implements Passability, ProjectileSink {
     private static final float BULLET_STEP_SECONDS = 0.12f;
     private final int width;
     private final int height;
@@ -54,7 +54,8 @@ public final class PlayingField implements Passability {
         listeners.forEach(listener -> listener.added(tank));
     }
 
-    void spawn(Bullet bullet) {
+    @Override
+    public void spawn(Bullet bullet) {
         if (!tanks.contains(bullet.owner())) return;
         for (Bullet other : List.copyOf(bullets)) {
             if (other.cell().equals(bullet.cell())) {

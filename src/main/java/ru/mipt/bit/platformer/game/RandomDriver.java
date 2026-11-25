@@ -2,18 +2,18 @@ package ru.mipt.bit.platformer.game;
 
 import java.util.List;
 import java.util.Random;
-import ru.mipt.bit.platformer.ai.AdvisorAdapter;
 import ru.mipt.bit.platformer.model.*;
 
+/** Controller implementation that proposes AI commands for one tank. */
 public final class RandomDriver implements Controller {
     private final Tank tank;
     private final PlayingField field;
     private final Random random;
     private float untilDecision;
-    private final AdvisorAdapter advisor;
+    private final RecommendationSource advisor;
     private final int damage;
 
-    public RandomDriver(Tank tank, PlayingField field, Random random, AdvisorAdapter advisor, int damage) {
+    public RandomDriver(Tank tank, PlayingField field, Random random, RecommendationSource advisor, int damage) {
         this.tank = tank;
         this.field = field;
         this.random = random;

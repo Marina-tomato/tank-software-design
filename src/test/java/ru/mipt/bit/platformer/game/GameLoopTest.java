@@ -12,7 +12,7 @@ class GameLoopTest {
         var field = new PlayingField(4, 4, List.of(new Tree(new Cell(2, 0))), player);
         var positions = new ArrayList<Cell>();
         var loop = new GameLoop(field, List.of((seconds, queue) -> queue.add(new Move(player, Direction.UP, field))),
-                frame -> positions.add(frame.player().cell()));
+                () -> positions.add(field.player().cell()));
         loop.frame(1f);
         assertEquals(List.of(new Cell(0, 1)), positions);
     }

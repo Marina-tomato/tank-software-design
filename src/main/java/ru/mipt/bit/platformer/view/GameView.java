@@ -22,7 +22,8 @@ import ru.mipt.bit.platformer.util.TileMovement;
 
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
-public final class GameView implements Disposable, FieldListener {
+/** LibGDX output adapter for frame presentation and level lifecycle events. */
+public final class GameView implements Disposable, FieldListener, ru.mipt.bit.platformer.game.GameLoop.Display {
     private final Map<Entity, Runnable> sprites = new LinkedHashMap<>();
     private final Tank player;
     private final BooleanSupplier healthBars;
@@ -62,7 +63,8 @@ public final class GameView implements Disposable, FieldListener {
                 ground.getHeight() * ground.getTileHeight());
     }
 
-    public void draw(PlayingField field) {
+    @Override
+    public void draw() {
         Gdx.gl.glClearColor(0f, 0f, 0.2f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         background.render();

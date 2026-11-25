@@ -4,7 +4,8 @@ import java.util.Optional;
 import ru.mipt.bit.platformer.game.*;
 import ru.mipt.bit.platformer.model.*;
 
-public final class AdvisorAdapter {
+/** Output adapter translating grid advice into commands understood by the game. */
+public final class AdvisorAdapter implements RecommendationSource {
     private final AimAdvisor advisor;
 
     public AdvisorAdapter(AimAdvisor advisor) {

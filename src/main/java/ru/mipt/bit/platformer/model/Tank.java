@@ -3,6 +3,7 @@ package ru.mipt.bit.platformer.model;
 public final class Tank implements Entity {
     private final int maxHealth;
     private int health;
+    private TankState state = DamageState.LIGHT;
     private Cell cell;
     private Cell destination;
     private Direction direction = Direction.RIGHT;
@@ -40,16 +41,19 @@ public final class Tank implements Entity {
         if (!Float.isFinite(seconds) || seconds < 0f) {
             throw new IllegalArgumentException("Invalid frame duration");
         }
-        progress = Math.min(1f, progress + seconds / stepSeconds);
+        progress = Math.min(1f, progress + seconds * state.travelSpeed() / stepSeconds);
         if (!isMoving()) cell = destination;
     }
 
-    public void shoot(PlayingField field, int damage) {
+    public void shoot(ProjectileSink field, int damage) {
         if (damage <= 0) throw new IllegalArgumentException("Damage must be positive");
-        if (isAlive()) field.spawn(new Bullet(direction.next(cell), direction, damage, this));
+        if (isAlive() && state.canFire()) field.spawn(new Bullet(direction.next(cell), direction, damage, this));
     }
 
-    void takeDamage(int damage) { health = Math.max(0, health - damage); }
+    void takeDamage(int damage) {
+        health = Math.max(0, health - damage);
+        state = DamageState.forHealth(healthFraction());
+    }
     public boolean isAlive() { return health > 0; }
     public double healthFraction() { return (double) health / maxHealth; }
     public int health() { return health; }

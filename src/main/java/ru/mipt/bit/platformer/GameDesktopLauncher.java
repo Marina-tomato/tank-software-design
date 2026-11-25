@@ -7,14 +7,13 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import ru.mipt.bit.platformer.game.*;
 import ru.mipt.bit.platformer.ai.*;
 import java.util.ArrayList;
-import ru.mipt.bit.platformer.input.KeyboardControls;
+import ru.mipt.bit.platformer.input.DesktopKeyboard;
 import ru.mipt.bit.platformer.model.*;
 import ru.mipt.bit.platformer.level.*;
 import java.util.Random;
 import ru.mipt.bit.platformer.view.GameView;
 
-import static com.badlogic.gdx.Input.Keys.*;
-
+/** Desktop entry adapter and composition root for LibGDX, the game loop and the domain. */
 public final class GameDesktopLauncher extends ApplicationAdapter {
     private GameLoop game;
     private GameView view;
@@ -36,28 +35,18 @@ public final class GameDesktopLauncher extends ApplicationAdapter {
         Layout layout = levelSource().load();
         PlayingField field = new PlayingField(layout.width(), layout.height(),
                 layout.trees().stream().map(Tree::new).toList(), new Tank(layout.player(), 0.4f));
-        KeyboardControls keyboard = new KeyboardControls();
-        keyboard.bind(UP, W, new Move(field.player(), Direction.UP, field));
-        keyboard.bind(LEFT, A, new Move(field.player(), Direction.LEFT, field));
-        keyboard.bind(DOWN, S, new Move(field.player(), Direction.DOWN, field));
-        keyboard.bind(RIGHT, D, new Move(field.player(), Direction.RIGHT, field));
         var healthBars = new ToggleHealthBars();
         view = new GameView(layout.width(), layout.height(), field.player(), healthBars::visible);
         field.subscribe(view);
         Random random = new Random();
         EnemySpawner.populate(field, random, 4, 0.4f);
         var controllers = new ArrayList<Controller>();
-        controllers.add((seconds, commands) -> keyboard.poll(Gdx.input::isKeyPressed, commands));
-        Fire fire = new Fire(field.player(), field, 25);
-        controllers.add((seconds, commands) -> {
-            if (Gdx.input.isKeyJustPressed(SPACE)) commands.add(fire);
-            if (Gdx.input.isKeyJustPressed(L)) commands.add(healthBars);
-        });
+        controllers.add(new DesktopKeyboard(field, 25, healthBars));
         var advisor = new AdvisorAdapter(new AimAdvisor());
         for (Tank tank : field.tanks()) {
             if (tank != field.player()) controllers.add(new RandomDriver(tank, field, random, advisor, 25));
         }
-        game = new GameLoop(field, controllers, view::draw);
+        game = new GameLoop(field, controllers, view);
     }
 
     @Override
