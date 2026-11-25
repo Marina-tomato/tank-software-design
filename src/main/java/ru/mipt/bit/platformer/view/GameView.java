@@ -58,9 +58,12 @@ public final class GameView implements Disposable {
             moveRectangleAtTileCenter(ground, treeBounds, grid(tree.cell()));
             drawTextureRegionUnscaled(batch, treeImage, treeBounds, 0);
         }
-        Tank tank = field.player();
-        motion.moveRectangleBetweenTileCenters(tankBounds, grid(tank.cell()), grid(tank.destination()), tank.progress());
-        drawTextureRegionUnscaled(batch, tankImage, tankBounds, tank.direction().rotation());
+        for (Tank tank : field.tanks()) {
+            if (tank != field.player()) batch.setColor(1f, 0.45f, 0.4f, 1f);
+            motion.moveRectangleBetweenTileCenters(tankBounds, grid(tank.cell()), grid(tank.destination()), tank.progress());
+            drawTextureRegionUnscaled(batch, tankImage, tankBounds, tank.direction().rotation());
+            batch.setColor(1, 1, 1, 1);
+        }
         batch.end();
     }
 

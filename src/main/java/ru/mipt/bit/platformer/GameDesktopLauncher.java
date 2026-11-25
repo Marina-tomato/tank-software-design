@@ -4,7 +4,8 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import ru.mipt.bit.platformer.game.GameLoop;
+import ru.mipt.bit.platformer.game.*;
+import java.util.ArrayList;
 import ru.mipt.bit.platformer.input.KeyboardControls;
 import ru.mipt.bit.platformer.model.*;
 import ru.mipt.bit.platformer.level.*;
@@ -35,12 +36,19 @@ public final class GameDesktopLauncher extends ApplicationAdapter {
         PlayingField field = new PlayingField(layout.width(), layout.height(),
                 layout.trees().stream().map(Tree::new).toList(), new Tank(layout.player(), 0.4f));
         KeyboardControls keyboard = new KeyboardControls();
-        keyboard.bind(UP, W, () -> field.player().move(Direction.UP, field));
-        keyboard.bind(LEFT, A, () -> field.player().move(Direction.LEFT, field));
-        keyboard.bind(DOWN, S, () -> field.player().move(Direction.DOWN, field));
-        keyboard.bind(RIGHT, D, () -> field.player().move(Direction.RIGHT, field));
+        keyboard.bind(UP, W, new Move(field.player(), Direction.UP, field));
+        keyboard.bind(LEFT, A, new Move(field.player(), Direction.LEFT, field));
+        keyboard.bind(DOWN, S, new Move(field.player(), Direction.DOWN, field));
+        keyboard.bind(RIGHT, D, new Move(field.player(), Direction.RIGHT, field));
         view = new GameView(layout.width(), layout.height());
-        game = new GameLoop(field, () -> keyboard.poll(Gdx.input::isKeyPressed), view::draw);
+        Random random = new Random();
+        EnemySpawner.populate(field, random, 4, 0.4f);
+        var controllers = new ArrayList<Controller>();
+        controllers.add((seconds, commands) -> keyboard.poll(Gdx.input::isKeyPressed, commands));
+        for (Tank tank : field.tanks()) {
+            if (tank != field.player()) controllers.add(new RandomDriver(tank, field, random));
+        }
+        game = new GameLoop(field, controllers, view::draw);
     }
 
     @Override
