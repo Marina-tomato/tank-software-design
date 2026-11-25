@@ -1,24 +1,23 @@
 package ru.mipt.bit.platformer.model;
 
-import com.badlogic.gdx.math.GridPoint2;
-import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
-
 public enum Direction {
-    UP(90f) {
-        @Override public GridPoint2 apply(GridPoint2 coords) { return incrementedY(coords); }
-    },
-    DOWN(-90f) {
-        @Override public GridPoint2 apply(GridPoint2 coords) { return decrementedY(coords); }
-    },
-    LEFT(-180f) {
-        @Override public GridPoint2 apply(GridPoint2 coords) { return decrementedX(coords); }
-    },
-    RIGHT(0f) {
-        @Override public GridPoint2 apply(GridPoint2 coords) { return incrementedX(coords); }
-    };
+    UP(0, 1, 90), LEFT(-1, 0, -180), DOWN(0, -1, -90), RIGHT(1, 0, 0);
 
-    private final float rotation;
-    Direction(float rotation) { this.rotation = rotation; }
-    public float getRotation() { return rotation; }
-    public abstract GridPoint2 apply(GridPoint2 coords);
+    private final int dx;
+    private final int dy;
+    private final int rotation;
+
+    Direction(int dx, int dy, int rotation) {
+        this.dx = dx;
+        this.dy = dy;
+        this.rotation = rotation;
+    }
+
+    public Cell next(Cell cell) {
+        return new Cell(cell.x() + dx, cell.y() + dy);
+    }
+
+    public int rotation() {
+        return rotation;
+    }
 }

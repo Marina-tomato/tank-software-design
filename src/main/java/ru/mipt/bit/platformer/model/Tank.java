@@ -1,54 +1,37 @@
 package ru.mipt.bit.platformer.model;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.Rectangle;
-import ru.mipt.bit.platformer.util.TileMovement;
+public final class Tank {
+    private Cell cell;
+    private Cell destination;
+    private Direction direction = Direction.RIGHT;
+    private float progress = 1f;
 
-import static com.badlogic.gdx.math.MathUtils.isEqual;
-import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
-
-public class Tank extends GameObject {
-    private static final float MOVEMENT_SPEED = 0.4f;
-
-    private GridPoint2 destinationCoordinates;
-    private float movementProgress = 1f;
-    private float rotation;
-
-    public Tank(TextureRegion graphics, GridPoint2 initialCoordinates) {
-        super(graphics, initialCoordinates);
-        this.destinationCoordinates = new GridPoint2(initialCoordinates);
-        this.rotation = 0f;
+    public Tank(Cell cell) {
+        this.cell = cell;
+        this.destination = cell;
     }
 
-    public float getRotation() { return rotation; }
-
-    public boolean isMoving() {
-        return !isEqual(movementProgress, 1f);
-    }
-
-    public void update(float deltaTime) {
-        movementProgress = continueProgress(movementProgress, deltaTime, MOVEMENT_SPEED);
-        if (isEqual(movementProgress, 1f)) {
-            coordinates.set(destinationCoordinates);
-        }
-    }
-
-    public void move(Direction direction, PlayingField field) {
+    public void move(Direction requested, PlayingField field) {
         if (isMoving()) return;
-
-        GridPoint2 nextCoords = direction.apply(coordinates);
-        rotation = direction.getRotation();
-        if (field.isFree(nextCoords)) {
-            destinationCoordinates.set(nextCoords);
-            movementProgress = 0f;
+        direction = requested;
+        Cell next = direction.next(cell);
+        if (field.isFree(next)) {
+            destination = next;
+            progress = 0f;
         }
     }
 
-    public void render(Batch batch, TileMovement tileMovement) {
-        tileMovement.moveRectangleBetweenTileCenters(rectangle, coordinates, destinationCoordinates, movementProgress);
-        drawTextureRegionUnscaled(batch, graphics, rectangle, rotation);
+    public void update(float seconds) {
+        if (!Float.isFinite(seconds) || seconds < 0f) {
+            throw new IllegalArgumentException("Invalid frame duration");
+        }
+        progress = Math.min(1f, progress + seconds / 0.4f);
+        if (!isMoving()) cell = destination;
     }
+
+    public Cell cell() { return cell; }
+    public Cell destination() { return destination; }
+    public Direction direction() { return direction; }
+    public float progress() { return progress; }
+    public boolean isMoving() { return progress < 1f; }
 }

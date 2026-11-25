@@ -1,15 +1,18 @@
 package ru.mipt.bit.platformer.model;
 
-import com.badlogic.gdx.math.GridPoint2;
-
-public class PlayingField {
+public final class PlayingField {
     private final Tree tree;
+    private final Tank player;
 
-    public PlayingField(Tree tree) {
+    public PlayingField(Tree tree, Tank player) {
         this.tree = tree;
+        this.player = player;
     }
 
-    public boolean isFree(GridPoint2 cell) {
-        return !tree.getCoordinates().equals(cell);
+    public boolean isFree(Cell cell) {
+        return !tree.cell().equals(cell);
     }
+
+    public Tank player() { return player; }
+    public Tree tree() { return tree; }
 }
