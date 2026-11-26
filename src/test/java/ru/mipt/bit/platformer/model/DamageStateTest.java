@@ -23,6 +23,34 @@ class DamageStateTest {
         }
     }
 
+    @Test void temporaryStateControlsSpeedAndShotIntervalUntilRemoved() {
+        var tank = new Tank(new Cell(0, 0), 1);
+        var shots = new ArrayList<Bullet>();
+        tank.shoot(shots::add, 1);
+        tank.update(0.2f);
+        tank.shoot(shots::add, 1);
+        assertEquals(1, shots.size());
+        tank.applyTemporaryState(new TankState() {
+            public float travelSpeed() { return 2; }
+            public boolean canFire() { return true; }
+            public float shotIntervalSeconds() { return 0.2f; }
+        });
+        tank.shoot(shots::add, 1);
+        tank.shoot(shots::add, 1);
+        assertEquals(2, shots.size());
+        tank.takeDamage(90);
+        tank.move(Direction.RIGHT, cell -> true);
+        tank.update(0.2f);
+        assertEquals(0.4f, tank.progress(), 0.00001f);
+        tank.shoot(shots::add, 1);
+        assertEquals(3, shots.size());
+        tank.clearTemporaryState();
+        tank.update(0.6f);
+        tank.shoot(shots::add, 1);
+        assertEquals(0.6f, tank.progress(), 0.00001f);
+        assertEquals(3, shots.size());
+    }
+
     @Test void damageDuringMovementChangesOnlyRemainingTravelTime() {
         var player = new Tank(new Cell(0, 0), 1);
         var field = new PlayingField(3, 1, List.of(), player);

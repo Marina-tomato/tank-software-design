@@ -4,4 +4,5 @@ package ru.mipt.bit.platformer.model;
 public interface TankState {
     float travelSpeed();
     boolean canFire();
+    float shotIntervalSeconds();
 }

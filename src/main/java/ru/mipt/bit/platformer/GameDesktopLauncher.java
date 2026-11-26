@@ -37,7 +37,7 @@ public final class GameDesktopLauncher extends ApplicationAdapter {
                 layout.trees().stream().map(Tree::new).toList(), new Tank(layout.player(), 0.4f));
         var healthBars = new ToggleHealthBars();
         view = new GameView(layout.width(), layout.height(), field.player(), healthBars::visible);
-        field.subscribe(view);
+        field.subscribe(view.entities());
         Random random = new Random();
         EnemySpawner.populate(field, random, 4, 0.4f);
         var controllers = new ArrayList<Controller>();

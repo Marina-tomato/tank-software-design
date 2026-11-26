@@ -18,5 +18,6 @@ public enum DamageState implements TankState {
     }
 
     public float travelSpeed() { return speed; }
+    public float shotIntervalSeconds() { return 0.4f; }
     public boolean canFire() { return armed; }
 }
