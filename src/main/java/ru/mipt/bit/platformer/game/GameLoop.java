@@ -5,8 +5,9 @@ import java.util.List;
 import ru.mipt.bit.platformer.model.PlayingField;
 
 public final class GameLoop {
+    /** Output port that presents one frame after the model advances. */
     @FunctionalInterface
-    public interface Display { void draw(PlayingField field); }
+    public interface Display { void draw(); }
 
     private final PlayingField field;
     private final List<Controller> controllers;
@@ -23,6 +24,6 @@ public final class GameLoop {
         for (Controller controller : controllers) controller.collect(seconds, commands);
         for (GameCommand command : commands) command.execute();
         field.update(seconds);
-        display.draw(field);
+        display.draw();
     }
 }

@@ -16,6 +16,7 @@ class CombatTest {
         player.shoot(field, 35);
         assertEquals(65, enemy.health());
         assertTrue(field.bullets().isEmpty());
+        field.update(0.4f);
         player.shoot(field, 65);
         assertFalse(field.tanks().contains(enemy));
         enemy.shoot(field, 50);

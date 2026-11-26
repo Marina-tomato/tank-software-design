@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import ru.mipt.bit.platformer.model.Cell;
 
+/** LevelSource adapter for a rectangular text map. */
 public final class TextLevel implements LevelSource {
     private final String text;
 

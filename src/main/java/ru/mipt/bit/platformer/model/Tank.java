@@ -3,10 +3,12 @@ package ru.mipt.bit.platformer.model;
 public final class Tank implements Entity {
     private final int maxHealth;
     private int health;
+    private TankState temporaryState;
+    private double secondsSinceShot = Double.POSITIVE_INFINITY;
     private Cell cell;
     private Cell destination;
     private Direction direction = Direction.RIGHT;
-    private float progress = 1f;
+    private double progress = 1f;
 
     private final float stepSeconds;
 
@@ -36,20 +38,39 @@ public final class Tank implements Entity {
         }
     }
 
-    public void update(float seconds) {
-        if (!Float.isFinite(seconds) || seconds < 0f) {
+    public void update(double seconds) {
+        if (!Double.isFinite(seconds) || seconds < 0f) {
             throw new IllegalArgumentException("Invalid frame duration");
         }
-        progress = Math.min(1f, progress + seconds / stepSeconds);
+        secondsSinceShot += seconds;
+        progress = Math.min(1.0, progress + seconds * activeState().travelSpeed() / stepSeconds);
         if (!isMoving()) cell = destination;
     }
 
-    public void shoot(PlayingField field, int damage) {
+    public void shoot(ProjectileSink field, int damage) {
         if (damage <= 0) throw new IllegalArgumentException("Damage must be positive");
-        if (isAlive()) field.spawn(new Bullet(direction.next(cell), direction, damage, this));
+        TankState state = activeState();
+        if (!isAlive() || !state.canFire() || secondsSinceShot < state.shotIntervalSeconds()) return;
+        secondsSinceShot = 0;
+        field.spawn(new Bullet(direction.next(cell), direction, damage, this));
     }
 
-    void takeDamage(int damage) { health = Math.max(0, health - damage); }
+    void takeDamage(int damage) {
+        health = Math.max(0, health - damage);
+    }
+
+    public void applyTemporaryState(TankState state) {
+        temporaryState = java.util.Objects.requireNonNull(state);
+    }
+
+    public void clearTemporaryState() {
+        temporaryState = null;
+    }
+
+    private TankState activeState() {
+        return temporaryState != null ? temporaryState : DamageState.forHealth(healthFraction());
+    }
+
     public boolean isAlive() { return health > 0; }
     public double healthFraction() { return (double) health / maxHealth; }
     public int health() { return health; }
@@ -57,6 +78,6 @@ public final class Tank implements Entity {
     public Cell cell() { return cell; }
     public Cell destination() { return destination; }
     public Direction direction() { return direction; }
-    public float progress() { return progress; }
+    public float progress() { return (float) progress; }
     public boolean isMoving() { return progress < 1f; }
 }

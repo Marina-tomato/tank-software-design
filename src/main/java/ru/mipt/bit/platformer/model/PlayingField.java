@@ -2,7 +2,7 @@ package ru.mipt.bit.platformer.model;
 
 import java.util.*;
 
-public final class PlayingField implements Passability {
+public final class PlayingField implements Passability, ProjectileSink {
     private static final float BULLET_STEP_SECONDS = 0.12f;
     private final int width;
     private final int height;
@@ -11,7 +11,7 @@ public final class PlayingField implements Passability {
     private final List<Tank> tanks = new ArrayList<>();
     private final List<Bullet> bullets = new ArrayList<>();
     private final List<FieldListener> listeners = new ArrayList<>();
-    private float bulletTime;
+    private double bulletTime;
 
     public PlayingField(int width, int height, List<Tree> trees, Tank player) {
         this.width = width;
@@ -49,12 +49,14 @@ public final class PlayingField implements Passability {
     }
 
     public void addTank(Tank tank) {
+        if (tank.isMoving()) throw new IllegalArgumentException("A tank must be stationary at spawn");
         if (!isFree(tank.cell())) throw new IllegalArgumentException("Occupied spawn: " + tank.cell());
         tanks.add(tank);
         listeners.forEach(listener -> listener.added(tank));
     }
 
-    void spawn(Bullet bullet) {
+    @Override
+    public void spawn(Bullet bullet) {
         if (!tanks.contains(bullet.owner())) return;
         for (Bullet other : List.copyOf(bullets)) {
             if (other.cell().equals(bullet.cell())) {
@@ -110,13 +112,20 @@ public final class PlayingField implements Passability {
         for (Bullet bullet : List.copyOf(bullets)) {
             if (hitsTerrainOrTank(bullet, bullet.cell())) remove(bullet);
         }
-        for (Tank tank : tanks) tank.update(seconds);
-        bulletTime += seconds;
-        while (bulletTime >= BULLET_STEP_SECONDS && !bullets.isEmpty()) {
-            bulletTime -= BULLET_STEP_SECONDS;
+        double remaining = seconds;
+        while (!bullets.isEmpty() && remaining >= BULLET_STEP_SECONDS - bulletTime) {
+            double untilImpact = BULLET_STEP_SECONDS - bulletTime;
+            advanceTanks(untilImpact);
+            remaining -= untilImpact;
+            bulletTime = 0;
             stepBullets();
         }
-        if (bullets.isEmpty()) bulletTime = 0;
+        advanceTanks(remaining);
+        bulletTime = bullets.isEmpty() ? 0 : bulletTime + remaining;
+    }
+
+    private void advanceTanks(double seconds) {
+        for (Tank tank : tanks) tank.update(seconds);
     }
 
     public int width() { return width; }
